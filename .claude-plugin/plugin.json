@@ -1,0 +1,13 @@
+{
+  "name": "linear-claude-session-tracking",
+  "version": "1.0.0",
+  "description": "Automatically track Claude Code sessions in Linear with commits and file changes",
+  "author": {
+    "name": "Ari Borensztein"
+  },
+  "repository": "https://github.com/ariboren/linear-claude-session-tracking",
+  "license": "MIT",
+  "keywords": ["linear", "session", "tracking", "git", "commits"],
+  "hooks": "./hooks/hooks.json",
+  "commands": "./commands/"
+}
