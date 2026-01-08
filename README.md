@@ -9,54 +9,62 @@ A Claude Code plugin that automatically tracks your coding sessions in Linear, p
 - **Session resume**: Resumed sessions continue updating the same issue
 - **Cross-referencing**: Issues include session IDs and resume commands
 
+## Requirements
+
+- [Linear CLI](https://github.com/evangelosmeklis/linear-cli) installed and authenticated
+- `jq` for JSON parsing
+
 ## Installation
 
-### From GitHub
+### 1. Add the marketplace
 
-```bash
-# Add the plugin marketplace
-/plugin marketplace add yourname/linear-claude-session-tracking
-
-# Install the plugin
-/plugin install linear-claude-session-tracking
+```
+/plugin marketplace add ariboren/claude-plugins
 ```
 
-### Local Development
+### 2. Install the plugin
 
-```bash
-claude --plugin-dir ~/Code/linear-claude-session-tracking
 ```
+/plugin install linear-claude-session-tracking@ariboren
+```
+
+### 3. Restart Claude Code
+
+Close and reopen Claude Code to load the plugin.
 
 ## Setup
 
-After installation, run the setup command to configure your Linear settings:
+### Option A: Interactive setup (recommended)
+
+Run the setup command:
 
 ```
 /linear-claude-session-tracking:setup
 ```
 
-This will guide you through:
+This will guide you through selecting your team, project, and label.
 
-1. Selecting your Linear team
-2. Choosing a project (default: "Claude sessions")
-3. Setting a label (default: "claude")
+### Option B: Manual configuration
 
-## Configuration
+1. Create the config directory:
 
-Configuration is stored at `~/.config/linear-claude-session-tracking/config`:
+   ```bash
+   mkdir -p ~/.config/linear-claude-session-tracking
+   ```
 
-```bash
-LINEAR_TEAM="MAN"           # Your Linear team key
-LINEAR_PROJECT="Claude sessions"  # Project name for issues
-LINEAR_LABEL="claude"       # Label to apply to issues
-```
+2. Create the config file at `~/.config/linear-claude-session-tracking/config`:
 
-You can also set these as environment variables to override the config file.
+   ```bash
+   LINEAR_TEAM="YOUR_TEAM_KEY"
+   LINEAR_PROJECT="Claude sessions"
+   LINEAR_LABEL="claude"
+   ```
 
-## Requirements
+   To find your team key, run `linear team list`.
 
-- [Linear CLI](https://github.com/linear/linear-cli) installed and authenticated
-- `jq` for JSON parsing
+3. Create a "Claude sessions" project in Linear (or use an existing project name)
+
+4. Create a "claude" label in Linear (or use an existing label name)
 
 ## How It Works
 
@@ -102,6 +110,16 @@ claude --resume abc123-def456
 
 _Updated via comments_
 ```
+
+## Configuration Options
+
+| Variable         | Description                                              | Default           |
+| ---------------- | -------------------------------------------------------- | ----------------- |
+| `LINEAR_TEAM`    | Your Linear team key (run `linear team list` to find it) | Required          |
+| `LINEAR_PROJECT` | Project name for session issues                          | `Claude sessions` |
+| `LINEAR_LABEL`   | Label to apply to session issues                         | `claude`          |
+
+These can also be set as environment variables to override the config file.
 
 ## License
 
