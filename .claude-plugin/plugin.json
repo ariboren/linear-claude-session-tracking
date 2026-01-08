@@ -8,6 +8,5 @@
   "repository": "https://github.com/ariboren/linear-claude-session-tracking",
   "license": "MIT",
   "keywords": ["linear", "session", "tracking", "git", "commits"],
-  "hooks": "./hooks/hooks.json",
   "commands": "./commands/"
 }
