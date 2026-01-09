@@ -151,8 +151,8 @@ linear_update_state() {
 linear_delete_issue() {
     local issue_id="$1"
 
-    # Note: delete may output warnings, suppress all output
-    linear issue delete "$issue_id" --confirm --no-color >/dev/null 2>&1
+    # Note: delete doesn't support --no-color, use -y for confirmation skip
+    linear issue delete "$issue_id" -y >/dev/null 2>&1
     return 0  # Always succeed - if issue is already deleted, that's fine
 }
 
