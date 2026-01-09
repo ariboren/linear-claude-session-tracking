@@ -48,6 +48,9 @@ if state_exists "$SESSION_ID"; then
             linear_add_comment "$ISSUE_ID" "Session resumed at $TIMESTAMP"
         fi
 
+        # Set status back to In Progress
+        linear_update_state "$ISSUE_ID" "In Progress"
+
         # Export issue ID if CLAUDE_ENV_FILE is set
         if [[ -n "${CLAUDE_ENV_FILE:-}" ]]; then
             echo "export LINEAR_SESSION_ISSUE_ID='$ISSUE_ID'" >> "$CLAUDE_ENV_FILE"
@@ -87,6 +90,9 @@ if [[ -z "$ISSUE_ID" ]]; then
 fi
 
 log "Created Linear issue: $ISSUE_ID"
+
+# Set status to In Progress
+linear_update_state "$ISSUE_ID" "In Progress"
 
 # Get issue URL
 ISSUE_URL=$(linear_issue_url "$ISSUE_ID" 2>/dev/null || echo "")

@@ -139,6 +139,14 @@ linear_update_title() {
     linear issue update "$issue_id" --title "$title" --no-color >/dev/null 2>&1
 }
 
+# Update Linear issue state
+linear_update_state() {
+    local issue_id="$1"
+    local state="$2"
+
+    linear issue update "$issue_id" --state "$state" --no-color >/dev/null 2>&1
+}
+
 # Add comment to Linear issue
 linear_add_comment() {
     local issue_id="$1"
