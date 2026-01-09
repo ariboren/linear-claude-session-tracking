@@ -38,14 +38,27 @@ if [[ -z "$ISSUE_ID" ]]; then
     exit 0
 fi
 
-log "Session ending ($REASON), marking $ISSUE_ID as Done"
+# Check if there were any commits in this session
+COMMITS_COUNT=$(state_get "$SESSION_ID" '.commits | length')
 
-# Set status to Done
-linear_update_state "$ISSUE_ID" "Done"
+if [[ "$COMMITS_COUNT" -eq 0 ]] || [[ -z "$COMMITS_COUNT" ]]; then
+    # No commits - delete the issue
+    log "Session ending with no commits, deleting issue $ISSUE_ID"
+    linear_delete_issue "$ISSUE_ID"
+    log "Deleted issue $ISSUE_ID (no commits)"
+else
+    # Has commits - mark as Done
+    log "Session ending ($REASON) with $COMMITS_COUNT commit(s), marking $ISSUE_ID as Done"
+    linear_update_state "$ISSUE_ID" "Done"
 
-# Add closing comment
-TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
-linear_add_comment "$ISSUE_ID" "Session ended at $TIMESTAMP (reason: $REASON)"
+    # Add closing comment
+    TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+    linear_add_comment "$ISSUE_ID" "Session ended at $TIMESTAMP (reason: $REASON) - $COMMITS_COUNT commit(s)"
+    log "Session $SESSION_ID completed"
+fi
 
-log "Session $SESSION_ID completed"
+# Clean up state file
+STATE_FILE=$(get_state_file "$SESSION_ID")
+rm -f "$STATE_FILE"
+
 exit 0

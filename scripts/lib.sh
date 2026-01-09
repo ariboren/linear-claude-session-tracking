@@ -147,6 +147,13 @@ linear_update_state() {
     linear issue update "$issue_id" --state "$state" --no-color >/dev/null 2>&1
 }
 
+# Delete Linear issue
+linear_delete_issue() {
+    local issue_id="$1"
+
+    linear issue delete "$issue_id" --confirm --no-color >/dev/null 2>&1
+}
+
 # Add comment to Linear issue
 linear_add_comment() {
     local issue_id="$1"
