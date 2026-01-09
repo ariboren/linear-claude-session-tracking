@@ -22,9 +22,18 @@ INPUT=$(read_hook_input)
 SESSION_ID=$(json_get "$INPUT" '.session_id')
 TOOL_NAME=$(json_get "$INPUT" '.tool_name')
 COMMAND=$(json_get "$INPUT" '.tool_input.command')
-STDOUT=$(json_get "$INPUT" '.tool_response.stdout')
-STDERR=$(json_get "$INPUT" '.tool_response.stderr')
-EXIT_CODE=$(json_get "$INPUT" '.tool_response.exit_code')
+
+# tool_response can be a string or object - handle both
+TOOL_RESPONSE=$(json_get "$INPUT" '.tool_response')
+if [[ "$TOOL_RESPONSE" == "null" ]] || [[ -z "$TOOL_RESPONSE" ]]; then
+    # Try getting it as a string directly
+    TOOL_RESPONSE=$(echo "$INPUT" | jq -r '.tool_response // empty')
+fi
+
+# Try to extract stdout/stderr/exit_code if it's an object
+STDOUT=$(echo "$INPUT" | jq -r '.tool_response.stdout // .tool_response.content // .tool_response // empty' 2>/dev/null)
+STDERR=$(echo "$INPUT" | jq -r '.tool_response.stderr // empty' 2>/dev/null)
+EXIT_CODE=$(echo "$INPUT" | jq -r '.tool_response.exit_code // .tool_response.exitCode // "0"' 2>/dev/null)
 
 # Only process Bash tool
 if [[ "$TOOL_NAME" != "Bash" ]]; then
@@ -32,12 +41,12 @@ if [[ "$TOOL_NAME" != "Bash" ]]; then
 fi
 
 # Check if this looks like a git commit command
-if [[ ! "$COMMAND" =~ git[[:space:]]+(commit|c)[[:space:]] ]]; then
+if [[ ! "$COMMAND" =~ git[[:space:]]+(commit|c) ]]; then
     exit 0
 fi
 
-# Check if commit succeeded (exit code 0)
-if [[ "$EXIT_CODE" != "0" ]]; then
+# Check if commit succeeded (exit code 0 or empty means success)
+if [[ -n "$EXIT_CODE" ]] && [[ "$EXIT_CODE" != "0" ]] && [[ "$EXIT_CODE" != "null" ]]; then
     exit 0
 fi
 
@@ -53,7 +62,13 @@ if [[ "$COMBINED_OUTPUT" =~ \[([^][:space:]]+)[[:space:]]([a-f0-9]{7,40})\] ]]; 
     COMMIT_HASH="${BASH_REMATCH[2]}"
 fi
 
-# If no hash found, try to get HEAD
+# If no hash found, try to get HEAD from the working directory
+CWD=$(json_get "$INPUT" '.cwd')
+if [[ -z "$COMMIT_HASH" ]] && [[ -n "$CWD" ]]; then
+    COMMIT_HASH=$(cd "$CWD" && git rev-parse --short HEAD 2>/dev/null || echo "")
+fi
+
+# Fallback to current directory
 if [[ -z "$COMMIT_HASH" ]]; then
     COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo "")
 fi
@@ -61,6 +76,11 @@ fi
 if [[ -z "$COMMIT_HASH" ]]; then
     log "Could not extract commit hash, skipping"
     exit 0
+fi
+
+# Change to working directory for git operations
+if [[ -n "$CWD" ]] && [[ -d "$CWD" ]]; then
+    cd "$CWD"
 fi
 
 # Validate it's a real commit
