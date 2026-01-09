@@ -8,7 +8,7 @@
 #   ...
 # }
 
-set -euo pipefail
+set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib.sh"
@@ -41,11 +41,10 @@ fi
 # Check if there were any commits in this session
 COMMITS_COUNT=$(state_get "$SESSION_ID" '.commits | length')
 
-if [[ "$COMMITS_COUNT" -eq 0 ]] || [[ -z "$COMMITS_COUNT" ]]; then
+if [[ "$COMMITS_COUNT" -eq 0 ]] || [[ -z "$COMMITS_COUNT" ]] || [[ "$COMMITS_COUNT" == "null" ]]; then
     # No commits - delete the issue
     log "Session ending with no commits, deleting issue $ISSUE_ID"
     linear_delete_issue "$ISSUE_ID"
-    log "Deleted issue $ISSUE_ID (no commits)"
 else
     # Has commits - mark as Done
     log "Session ending ($REASON) with $COMMITS_COUNT commit(s), marking $ISSUE_ID as Done"
